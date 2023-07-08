@@ -33,6 +33,7 @@ class Calculator(QWidget, Ui_Calculator):
         self.pb_clearAll.clicked.connect(self.clear_all_clicked)
         self.pb_clearCurrent.clicked.connect(self.clear_current_clicked)
 
+        # variables to be used to store the numbers and operator used by the calculator
         self.active_num = ''
         self.first_num = ''
         self.operator = ''
@@ -63,60 +64,108 @@ class Calculator(QWidget, Ui_Calculator):
             self.calc_num.setText(self.active_num)
 
 
+    # when X is clicked the current first_num variable is set to the value of active_num variable
+    # the active_num variable is reset and operator is set to the operator
     @QtCore.Slot()
     def multiply_clicked(self):
-        # when X is clicked the current first_num variable is set to the value of active_num variable
-        # the active_num variable is reset
-        # the operator variable is set to X
         self.first_num = self.active_num
         self.active_num = ''
         self.operator = self.sender()
-        self.operator = self.operator.text()
-        return self.operator
+        return self.operator.text()
 
 
+    # when / is clicked the current first_num variable is set to the value of active_num variable
+    # the active_num variable is reset and operator is set to the operator
     @QtCore.Slot()
     def divide_clicked(self):
-        self.button_value = self.sender()
+        self.first_num = self.active_num
+        self.active_num = ''
+        self.operator = self.sender()
+        return self.operator.text()
 
 
+    # when - is clicked the current first_num variable is set to the value of active_num variable
+    # the active_num variable is reset and operator is set to the operator
     @QtCore.Slot()
     def subtract_clicked(self):
-        self.button_value = self.sender()
+        # logic for negative numbers
+        # if active_num hasn't been set yet and minus is clicked the number will be negative
+        if self.active_num == '':
+            self.active_num += '-'
+            return self.active_num
+        
+        # if first_num has been set and minus is clicked the new active num will be negative
+        if self.first_num != '':
+            self.active_num += '-'
+            return self.active_num
+        
+        self.first_num = self.active_num
+        self.active_num = ''
+        self.operator = self.sender()
+        return self.operator.text()
 
 
+    # when X is clicked the current first_num variable is set to the value of active_num variable
+    # the active_num variable is reset and operator is set to the operator
     @QtCore.Slot()
     def add_clicked(self):
-        self.button_value = self.sender()
+        self.first_num = self.active_num
+        self.active_num = ''
+        self.operator = self.sender()
+        return self.operator.text()
 
 
     @QtCore.Slot()
     def equals_clicked(self):
 
-        # when the operator variable is X the first_num is multiplied by the active num  
+        # logic for multiplication
         # the first_num and active_num variables are first converted to floats    
-        if self.operator == 'X':
+        if self.operator.text() == 'X':
             equals_num = float(self.first_num) * float(self.active_num)
 
-        # if the value of this is greater than 9 digits an out of range message is shown
-        # the values of active_num, first_num, and operator are reset
-            if equals_num > 999999999:
-                self.calc_num.setText('Out Of Range')
+        # logic for division 
+        elif self.operator.text() == '/':
+            # if you try to divide by 0 you receive an error
+            if self.active_num == '0':
+                self.calc_num.setText('Error / 0')
                 self.active_num = ''
                 self.first_num = ''
                 self.operator = ''
-                return self.active_num, self.first_num, self.operator
+                return self.active_num
+            else:
+                equals_num = float(self.first_num) / float(self.active_num)
+
+        # logic for subtraction
+        elif self.operator.text() == '-':
+            equals_num = float(self.first_num) - float(self.active_num)
+
+        # logic for addition 
+        elif self.operator.text() == '+':
+            equals_num = float(self.first_num) + float(self.active_num)
+
+        # rounds equals_num to 2 decimal places
+        equals_num = round(equals_num, 2)
+
+        # if the value of this is greater than 9 digits an out of range message is shown
+        # the values of active_num, first_num, and operator are reset
+        if equals_num > 999999999 or equals_num < -999999999:
+            self.calc_num.setText('Out Of Range')
+            self.active_num = ''
+            self.first_num = ''
+            self.operator = ''
+            return self.active_num, self.first_num, self.operator
 
         # if the value is less than 9 digits the equals_num value is converted to a string
         # the equals_num is displayed on the calc_num screen
         # active_num is set to the value of str(equals_num)
         # first_num and operator are reset
-            else:
-                self.calc_num.setText(str(equals_num))
-                self.active_num = str(equals_num)
-                self.first_num = ''
-                self.operator = ''
-                return self.active_num, self.first_num, self.operator
+        else:
+            self.calc_num.setText(str(equals_num))
+            self.active_num = str(equals_num)
+            self.first_num = ''
+            self.operator = ''
+            return self.active_num, self.first_num, self.operator
+
 
     # when CE is clicked active_num, first_num and operator are reset
     # the calc_num screen is set to show 0
@@ -135,7 +184,6 @@ class Calculator(QWidget, Ui_Calculator):
         self.active_num = ''
         self.calc_num.setText('0')
         return self.active_num
-
 
 
 #creates an instance of QApplication and executes the program
